@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Partage d’écran — SkreenLink</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#141c31;--line:#2c3855;--text:#f4f7ff;--muted:#aab6d1;--blue:#5b8cff;--red:#ff5f72;--green:#3bd49b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#18264a 0,#0b1020 58%);font:16px/1.5 system-ui,Segoe UI,Arial;color:var(--text);min-height:100vh}
+main{max-width:1000px;margin:auto;padding:30px 18px 50px}.brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#6ca4ff,#7457ff);display:grid;place-items:center;font-size:23px}
+h1{font-size:clamp(26px,4vw,38px);margin:0}p{color:var(--muted)}.panel{background:#141c31eF;border:1px solid var(--line);border-radius:20px;padding:22px;margin:16px 0;box-shadow:0 16px 50px #0003}
+h2{font-size:20px;margin:0 0 8px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}button{border:0;border-radius:12px;padding:12px 17px;background:var(--blue);color:white;font-weight:700;font-size:15px;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#283653}.danger{background:#9f2e43}.field{display:flex;gap:8px;flex:1;min-width:240px}input{min-width:0;flex:1;border:1px solid var(--line);background:#080d19;color:white;padding:12px;border-radius:10px}.status{display:flex;align-items:center;gap:9px;color:var(--muted);margin-top:14px}.dot{width:9px;height:9px;border-radius:50%;background:#77829a}.dot.good{background:var(--green)}.dot.bad{background:var(--red)}video{width:100%;max-height:65vh;background:#05070d;border-radius:14px;display:block;object-fit:contain}.video-wrap{position:relative;margin-top:14px}.empty{border:1px dashed #3a4866;border-radius:14px;min-height:230px;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted)}.small{font-size:13px}.notice{border-left:3px solid #e5b454;padding:10px 13px;background:#30281766;border-radius:8px;color:#e9d8ad}.ok{color:#91f2ce}.hidden{display:none!important}ol{padding-left:22px;color:var(--muted)}li{margin:7px 0}a{color:#9ec0ff}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><div class="logo">▣</div><div><h1>SkreenLink</h1><div class="small" style="color:var(--muted)">Partage d’écran avec autorisation</div></div></div>
+
+  <section class="panel">
+    <h2>1. Sur ton PC — recevoir un écran</h2>
+    <p>Crée une session. Le lien d’invitation sera généré automatiquement et tu pourras l’envoyer à la personne.</p>
+    <div class="row"><button id="createBtn">Créer une session</button><button id="stopBtn" class="danger" disabled>Arrêter le partage</button></div>
+    <div id="inviteArea" class="hidden" style="margin-top:16px">
+      <label for="inviteLink" class="small">Lien à envoyer à la personne</label>
+      <div class="field"><input id="inviteLink" readonly><button id="copyBtn" class="secondary">Copier le lien</button></div>
+      <div class="small" style="color:var(--muted);margin-top:7px">Ce lien fonctionne pour cette session, tant que cette page reste ouverte. Une nouvelle session peut générer un autre lien.</div>
+    </div>
+    <div class="status"><span id="hostDot" class="dot"></span><span id="hostStatus">Aucune session active.</span></div>
+  </section>
+
+  <section class="panel">
+    <h2>2. Sur l’appareil qui partage</h2>
+    <p>Ouvre le lien reçu. Le navigateur demandera explicitement de choisir l’écran, la fenêtre ou l’onglet à partager.</p>
+    <div id="guestPanel" class="hidden">
+      <div class="row"><button id="shareBtn">Partager mon écran</button><button id="guestStopBtn" class="danger" disabled>Arrêter le partage</button></div>
+      <div class="status"><span id="guestDot" class="dot"></span><span id="guestStatus">Prêt à se connecter.</span></div>
+    </div>
+    <div id="notGuest" class="small" style="color:var(--muted)">Cette section s’active automatiquement quand tu ouvres un lien d’invitation.</div>
+  </section>
+
+  <section class="panel">
+    <h2>Écran reçu</h2>
+    <div id="emptyVideo" class="empty">En attente de l’écran partagé…<br><span class="small">L’image apparaîtra ici après l’autorisation de l’autre personne.</span></div>
+    <div class="video-wrap"><video id="remoteVideo" autoplay playsinline class="hidden"></video></div>
+  </section>
+
+  <section class="panel">
+    <h2>À savoir</h2>
+    <div class="notice">Pour fonctionner entre appareils sur Internet, cette page doit être publiée sur un site HTTPS. Le fichier HTML seul ne peut pas créer un lien public permanent ni garantir la connexion sur tous les réseaux.</div>
+    <ol>
+      <li>La personne doit accepter la demande de partage dans son navigateur.</li>
+      <li>La connexion utilise un service de signalisation PeerJS et WebRTC pour transmettre l’écran directement lorsque le réseau le permet.</li>
+      <li>Le bouton d’arrêt ferme la connexion des deux côtés. La personne qui partage peut aussi arrêter depuis la barre de partage de son navigateur.</li>
+      <li>Le partage d’écran depuis un téléphone dépend du navigateur et du système : tous les téléphones ne l’autorisent pas depuis une page web.</li>
+    </ol>
+    <p class="small">Confidentialité : ne partage que ton écran avec une personne de confiance. Le site ne peut pas démarrer le partage sans l’action et l’autorisation de la personne.</p>
+  </section>
+</main>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const hostSide = !new URLSearchParams(location.search).has('join');
+  let peer = null, conn = null, call = null, localStream = null, remoteStream = null, ended = false;
+  const setStatus = (id, dotId, text, kind='') => {
+    $(id).textContent = text;
+    $(dotId).className = 'dot' + (kind ? ' '+kind : '');
+  };
+  function stopAll(message='Partage arrêté.') {
+    ended = true;
+    try { if (call) call.close(); } catch {}
+    try { if (conn) conn.close(); } catch {}
+    try { if (peer) peer.destroy(); } catch {}
+    if (localStream) localStream.getTracks().forEach(t => t.stop());
+    if (remoteStream) remoteStream.getTracks().forEach(t => t.stop());
+    localStream = null; remoteStream = null; call = null; conn = null; peer = null;
+    $('remoteVideo').srcObject = null;
+    $('remoteVideo').classList.add('hidden');
+    $('emptyVideo').classList.remove('hidden');
+    $('stopBtn').disabled = true; $('guestStopBtn').disabled = true; $('shareBtn').disabled = false;
+    setStatus(hostSide ? 'hostStatus' : 'guestStatus', hostSide ? 'hostDot' : 'guestDot', message, 'bad');
+    if (hostSide) $('inviteArea').classList.add('hidden');
+  }
+  function readyPeer(id) {
+    return new Promise((resolve,reject) => {
+      peer = new Peer(id || undefined, {debug:1});
+      peer.on('open', resolve);
+      peer.on('error', err => {
+        setStatus(hostSide?'hostStatus':'guestStatus',hostSide?'hostDot':'guestDot','Erreur : '+err.type+'. Vérifie la connexion Internet puis réessaie.','bad');
+        reject(err);
+      });
+      peer.on('disconnected', () => setStatus(hostSide?'hostStatus':'guestStatus',hostSide?'hostDot':'guestDot','Connexion au service interrompue.','bad'));
+    });
+  }
+  function bindCall(c) {
+    call = c;
+    call.on('stream', stream => {
+      remoteStream = stream;
+      $('remoteVideo').srcObject = stream;
+      $('remoteVideo').classList.remove('hidden'); $('emptyVideo').classList.add('hidden');
+      $('stopBtn').disabled = false;
+      setStatus('hostStatus','hostDot','Écran reçu en direct.','good');
+    });
+    call.on('close', () => { if (!ended) stopAll('Le partage a été arrêté par l’autre appareil.'); });
+    call.on('error', () => { if (!ended) stopAll('La connexion vidéo a échoué. Réessaie.'); });
+  }
+  async function createHost() {
+    ended = false; $('createBtn').disabled = true;
+    if (!window.isSecureContext || location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      setStatus('hostStatus','hostDot','HTTPS requis : publie index.html sur un hébergeur HTTPS (par exemple GitHub Pages), puis ouvre son adresse https:// avant de créer une session.','bad');
+      $('createBtn').disabled = false;
+      return;
+    }
+    try {
+      await readyPeer();
+      const url = new URL(location.href);
+      url.searchParams.set('join', peer.id);
+      $('inviteLink').value = url.href;
+      $('inviteArea').classList.remove('hidden');
+      $('stopBtn').disabled = false;
+      setStatus('hostStatus','hostDot','Session créée. En attente de l’autre appareil…','good');
+      peer.on('connection', c => {
+        conn = c;
+        c.on('open', () => setStatus('hostStatus','hostDot','Appareil connecté. En attente du partage d’écran…','good'));
+        c.on('data', data => { if (data === 'STOP') stopAll('L’autre appareil a arrêté le partage.'); });
+      });
+      peer.on('call', incoming => {
+        incoming.answer();
+        bindCall(incoming);
+      });
+    } catch(e) {
+      $('createBtn').disabled = false;
+      setStatus('hostStatus','hostDot','Impossible de créer la session. Vérifie Internet et recharge la page.','bad');
+    }
+  }
+  async function joinAndShare() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      setStatus('guestStatus','guestDot','Ce navigateur ne permet pas le partage d’écran ici. Ouvre le lien dans un navigateur compatible, en HTTPS.','bad'); return;
+    }
+    $('shareBtn').disabled = true; ended = false;
+    try {
+      localStream = await navigator.mediaDevices.getDisplayMedia({video:{frameRate:15},audio:false});
+      localStream.getVideoTracks()[0].addEventListener('ended', () => { if (!ended) stopAll('Partage arrêté depuis le navigateur.'); });
+      const target = new URL(location.href).searchParams.get('join');
+      await readyPeer();
+      conn = peer.connect(target, {reliable:true});
+      conn.on('open', () => {
+        call = peer.call(target, localStream);
+        call.on('close', () => { if (!ended) stopAll('Le PC a arrêté le partage.'); });
+        call.on('error', () => { if (!ended) stopAll('La connexion vidéo a échoué.'); });
+        $('guestStopBtn').disabled = false;
+        setStatus('guestStatus','guestDot','Écran partagé. Laisse cette page ouverte.','good');
+      });
+      conn.on('data', data => { if (data === 'STOP') stopAll('Le PC a arrêté le partage.'); });
+      conn.on('close', () => { if (!ended) stopAll('La session a été fermée par le PC.'); });
+    } catch(e) {
+      if (localStream) localStream.getTracks().forEach(t => t.stop());
+      localStream = null; $('shareBtn').disabled = false;
+      setStatus('guestStatus','guestDot', e.name === 'NotAllowedError' ? 'Partage annulé : aucune capture n’a été lancée.' : 'Impossible de démarrer le partage. Vérifie HTTPS et les autorisations.','bad');
+    }
+  }
+  function stopGuest() {
+    try { if (conn && conn.open) conn.send('STOP'); } catch {}
+    stopAll('Partage arrêté.');
+  }
+  $('createBtn').addEventListener('click', createHost);
+  $('copyBtn').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('inviteLink').value); $('copyBtn').textContent='Copié !'; setTimeout(()=>$('copyBtn').textContent='Copier le lien',1400); }
+    catch { $('inviteLink').select(); document.execCommand('copy'); }
+  });
+  $('stopBtn').addEventListener('click', stopGuest);
+  $('guestStopBtn').addEventListener('click', stopGuest);
+  $('shareBtn').addEventListener('click', joinAndShare);
+  const mobileLike = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const securePage = window.isSecureContext;
+  if (!securePage && location.protocol !== 'file:') {
+    const note = document.createElement('div');
+    note.className = 'notice';
+    note.style.marginTop = '12px';
+    note.textContent = 'Cette page n’est pas en contexte sécurisé HTTPS. Le partage d’écran risque de ne pas être disponible.';
+    document.querySelector('main').prepend(note);
+  }
+  if (hostSide) {
+    $('guestPanel').classList.add('hidden'); $('notGuest').classList.remove('hidden');
+    if (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      setStatus('hostStatus','hostDot','Fichier local : il faut publier cette page sur HTTPS avant d’envoyer un lien.','bad');
+    }
+  } else {
+    $('guestPanel').classList.remove('hidden'); $('notGuest').classList.add('hidden');
+    $('createBtn').disabled = true;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      $('shareBtn').disabled = true;
+      setStatus('guestStatus','guestDot','Ce navigateur ou cet appareil ne permet pas le partage d’écran depuis cette page. Essaie Chrome ou Edge à jour sur ordinateur, ou Safari/Chrome à jour si le système l’autorise.','bad');
+    } else {
+      setStatus('guestStatus','guestDot', mobileLike ? 'Lien ouvert sur un appareil mobile. La fonction de partage dépend du navigateur et du système.' : 'Lien d’invitation détecté. Clique sur « Partager mon écran ».');
+    }
+  }
+  window.addEventListener('beforeunload', () => {
+    try { if (conn && conn.open) conn.send('STOP'); } catch {}
+    if (localStream) localStream.getTracks().forEach(t => t.stop());
+  });
+})();
+</script>
+</body>
+</html>
